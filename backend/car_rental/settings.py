@@ -9,8 +9,11 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+# Load .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +23,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-6xmdjpsl&@*_b0e@@aie0zzsq+oxv_gyy#m!d%a($%!^&&3h9w'
+SECRET_KEY = 'django-insecure-glfr!1=9bqca$ncx!z(8-4n(=jrn%$m@abl1^l1ye!pdsoz&@v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '192.168.1.11',
+]
 
 
 # Application definition
@@ -37,6 +42,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework_simplejwt.token_blacklist',
+    'authdrive.apps.AuthdriveConfig',
+    'fleet_management.apps.FleetManagementConfig',
+    'overdrive.apps.OverdriveConfig',
+    'payment.apps.PaymentConfig',
 ]
 
 MIDDLEWARE = [
@@ -99,7 +109,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -121,3 +130,42 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = "authdrive.ServiceUser"
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',  # Session auth
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT auth
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+# JWT settings
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'BLACKLIST_AFTER_ROTATION': True,  # Enable blacklisting of refresh tokens
+    'TOKEN_BLACKLIST': True,  # Enable token blacklisting
+}
+
+PAYMENT_METHOD_CHOICES = [
+    ('gcash', 'GCash'),
+    ('paypal', 'PayPal'),
+    ('stripe', 'Stripe'),
+    ('cash', 'Cash')
+]
+
+# Stripe Configuration
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+# PayPal Configuration
+PAYPAL_BASE_URL = 'https://api-m.sandbox.paypal.com'  # Use 'https://api.paypal.com' for live
+PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID')
+PAYPAL_SECRET = os.environ.get('PAYPAL_SECRET')
+PAYPAL_MODE = os.environ.get('PAYPAL_MODE')  # 'sandbox' for testing, 'live' for production
+PAYPAL_RETURN_URL = 'http://example.com/api/payments/paypal-return/'
+PAYPAL_CANCEL_URL = 'http://example.com/api/payments/paypal-cancel/'
