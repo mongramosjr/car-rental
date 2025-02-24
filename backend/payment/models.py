@@ -9,7 +9,8 @@ class BookingPayment(models.Model):
     method = models.CharField(max_length=16, choices=settings.PAYMENT_METHOD_CHOICES)
     transaction_id = models.CharField(max_length=100, blank=True, null=True)
     status = models.CharField(max_length=32, default='pending')
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'booking_payments'

@@ -35,8 +35,9 @@ class Car(models.Model):
     )
     is_available = models.BooleanField(default=True)
     price_per_hour = models.DecimalField(max_digits=6, decimal_places=2)
-    created_at = models.DateTimeField(default=timezone.now)
-    location = models.CharField(max_length=200)  # Simplified for example
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    location = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.make.name} {self.model} {self.year}"

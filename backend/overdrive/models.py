@@ -16,7 +16,8 @@ class Booking(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     # Current status of the booking
     STATUS_CHOICES = [
