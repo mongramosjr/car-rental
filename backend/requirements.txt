@@ -1,0 +1,9 @@
+django
+djangorestframework
+djangorestframework-simplejwt
+django-cors-headers  # For cross-origin requests
+pyotp
+boto3
+stripe
+mock
+cryptography

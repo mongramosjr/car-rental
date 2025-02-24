@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework_simplejwt.token_blacklist',
     'authdrive.apps.AuthdriveConfig',
+    'drivecheck.apps.DrivecheckConfig',
     'fleet_management.apps.FleetManagementConfig',
     'overdrive.apps.OverdriveConfig',
     'payment.apps.PaymentConfig',

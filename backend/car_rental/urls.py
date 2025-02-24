@@ -23,4 +23,5 @@ urlpatterns = [
     path('', include('fleet_management.urls')),
     path('', include('overdrive.urls')),
     path('', include('payment.urls')),
+    path('', include('drivecheck.urls')),
 ]
