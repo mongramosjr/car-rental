@@ -46,10 +46,10 @@ class Command(BaseCommand):
             
             # Cars data
             cars = [
-                {"make": 1, "model": "Corolla", "year": 2022, "is_available": True, "price_per_hour": 120.00, "license_plate": "ABC1234"},
-                {"make": 2, "model": "Civic", "year": 2021, "is_available": True, "price_per_hour": 130.00, "license_plate": "CDE1234"},
-                {"make": 3, "model": "Mustang", "year": 2023, "is_available": False, "price_per_hour": 150.00, "license_plate": "EFG1234"},
-                {"make": 4, "model": "Malibu", "year": 2020, "is_available": True, "price_per_hour": 300.00, "license_plate": "HIJ1234"},
+                {"make": 1, "model": "Corolla", "year": 2022, "is_available": True, "price_per_hour": 120.00, "license_plate": "ABC1234", "passenger_capacity": 5,},
+                {"make": 2, "model": "Civic", "year": 2021, "is_available": True, "price_per_hour": 130.00, "license_plate": "CDE1234", "passenger_capacity": 5,},
+                {"make": 3, "model": "Mustang", "year": 2023, "is_available": False, "price_per_hour": 150.00, "license_plate": "EFG1234", "passenger_capacity": 5,},
+                {"make": 4, "model": "Malibu", "year": 2020, "is_available": True, "price_per_hour": 300.00, "license_plate": "HIJ1234", "passenger_capacity": 5,},
             ]
     
             # Insert cars

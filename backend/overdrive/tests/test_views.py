@@ -26,6 +26,7 @@ class CarViewTest(APITestCase):
         )
         self.car = Car.objects.create(
             license_plate="ABC1234",
+            passenger_capacity=5,
             make=self.toyota,
             model="Corolla",
             year=2022,
@@ -34,6 +35,7 @@ class CarViewTest(APITestCase):
         )
         self.car2 = Car.objects.create(
             license_plate="ABC5678",
+            passenger_capacity=5,
             make=self.toyota,
             model="Vios",
             year=2020,
@@ -101,6 +103,7 @@ class BaseBookingAPITest(APITestCase):
         )
         self.car = Car.objects.create(
             license_plate="XYZ987",
+            passenger_capacity=5,
             make=self.toyota,
             model='TestModel',
             year=2024,

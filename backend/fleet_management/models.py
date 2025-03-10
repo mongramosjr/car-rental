@@ -21,8 +21,20 @@ class Owner(models.Model):
     def __str__(self):
         return self.name
 
-class Car(models.Model):
+class Vehicle(models.Model):
     owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, null=True, blank=True)
+    passenger_capacity = models.PositiveSmallIntegerField()
+    is_available = models.BooleanField(default=True)
+    price_per_hour = models.DecimalField(max_digits=6, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    location = models.JSONField(blank=True, null=True)
+    image = models.ImageField(upload_to='cars/', blank=True, null=True, help_text="Image of vehicle")
+
+    def __str__(self):
+        return f"{self.name} ({self.__class__.__name__})"
+
+class Car(Vehicle):  # Separate table for Cars
     license_plate = models.CharField(max_length=20, unique=True)
     make = models.ForeignKey(Manufacturer, on_delete=models.CASCADE)
     model = models.CharField(max_length=100)
@@ -33,11 +45,17 @@ class Car(models.Model):
         ],
         help_text=f'Enter a year between 1978 and {current_year}'
     )
-    is_available = models.BooleanField(default=True)
-    price_per_hour = models.DecimalField(max_digits=6, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    location = models.JSONField(blank=True, null=True)
+    fuel_type = models.CharField(max_length=50, choices=[("gasoline", "Gasoline"), ("diesel", "Diesel"), ("electric", "Electric")])
 
     def __str__(self):
         return f"{self.make.name} {self.model} {self.year}"
+
+class MotorizedBanca(Vehicle):  # Separate table for Banca
+    name = models.CharField(max_length=100, help_text="Name of banca" )
+    vessel_official_number = models.CharField(max_length=64, unique=True)
+
+class PassengerVessel(Vehicle):  # Separate table for Vessels
+    name = models.CharField(max_length=100, help_text="Name of vessel" )
+    vessel_official_number = models.CharField(max_length=64, unique=True)
+    gross_tonnage = models.FloatField(help_text="Gross tonnage")
+    net_tonnage = models.FloatField(help_text="Net tonnage")

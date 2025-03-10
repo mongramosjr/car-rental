@@ -36,6 +36,7 @@ class CarAPITestCase(APITestCase):
         # Create test car
         self.car = Car.objects.create(
             owner=self.owner,
+            passenger_capacity=5,
             license_plate="XYZ789",
             make=self.manufacturer,
             model="Civic",
@@ -66,7 +67,9 @@ class CarAPITestCase(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
         data = {
             'license_plate': 'DEF456',
+            'passenger_capacity':5,
             'make_id': self.manufacturer.id,
+            'owner_id': self.owner.id,
             'model': 'Accord',
             'year': 2022,
             'price_per_hour': 20.00,
@@ -81,6 +84,7 @@ class CarAPITestCase(APITestCase):
         """Test creating a car without authentication should fail"""
         data = {
             'license_plate': 'GHI789',
+            'passenger_capacity':5,
             'make_id': self.manufacturer.id,
             'model': 'CR-V',
             'year': 2023,
@@ -125,10 +129,13 @@ class CarAPITestCase(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
         data = {
             'license_plate': 'JKL012',
+            'passenger_capacity':5,
             'make_id': self.manufacturer.id,
+            'owner_id': self.owner.id,
             'model': 'Pilot',
             'year': 2022,
             'price_per_hour': -5.00
         }
         response = self.client.post('/api/cars/create/', data, format='json')
+        print(f"Response data: {json.dumps(response.data, indent=2)}")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

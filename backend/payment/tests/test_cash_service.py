@@ -22,7 +22,8 @@ class CashServiceTestCase(TestCase):
         self.manufacturer = Manufacturer.objects.create(name="Test Make", country="Test Country")
         self.car = Car.objects.create(
             owner=self.owner,
-            license_plate="ABC123", 
+            license_plate="ABC123",
+            passenger_capacity=5,
             make=self.manufacturer,
             model="Test Model", 
             year=2020, 

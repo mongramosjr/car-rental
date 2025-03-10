@@ -26,6 +26,7 @@ class CarModelTest(TestCase):
 
         Car.objects.create(
             license_plate="ABC1234",
+            passenger_capacity=5,
             make=self.toyota,
             model="Corolla",
             year=2022,

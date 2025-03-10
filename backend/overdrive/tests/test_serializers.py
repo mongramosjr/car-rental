@@ -22,6 +22,7 @@ class SerializerTestCase(TestCase):
         
         self.car_data = {
             'license_plate': 'XYZ7890',
+            'passenger_capacity':5,
             'make': self.toyota,
             'model': 'Civic',
             'year': 2023,
@@ -74,6 +75,7 @@ class SerializerTestCase(TestCase):
         invalid_data = {
             'license_plate': 'XYZ7890',  # duplicate license plate
             'make': self.toyota,
+            'passenger_capacity':5,
             'model': 'Civic',
             'year': 2023,
             'is_available': True,

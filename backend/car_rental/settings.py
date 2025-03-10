@@ -170,3 +170,7 @@ PAYPAL_SECRET = os.environ.get('PAYPAL_SECRET')
 PAYPAL_MODE = os.environ.get('PAYPAL_MODE')  # 'sandbox' for testing, 'live' for production
 PAYPAL_RETURN_URL = 'http://example.com/api/payments/paypal-return/'
 PAYPAL_CANCEL_URL = 'http://example.com/api/payments/paypal-cancel/'
+
+
+MEDIA_URL = '/media/' # URL that will serve the media files
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # The directory where media files will be stored

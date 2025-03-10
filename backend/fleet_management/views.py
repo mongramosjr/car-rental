@@ -15,7 +15,7 @@ class CarListAPI(APIView):
 
     def get(self, request):
         cars = Car.objects.filter(is_available=True)
-        serializer = CarSerializer(cars, many=True)
+        serializer = CarSerializer(cars, many=True, context={'request': request}) # Pass request in context
         return Response(serializer.data)
 
 # Authenticated endpoint to create a new car
