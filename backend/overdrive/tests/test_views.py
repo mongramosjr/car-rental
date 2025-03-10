@@ -8,7 +8,7 @@ import datetime
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from overdrive.models import Booking
-from fleet_management.models import Car, Manufacturer
+from fleet_management.models import Car, Manufacturer, Vehicle
 import json
 
 User = get_user_model()
@@ -44,6 +44,10 @@ class CarViewTest(APITestCase):
             location="Quezon City",
         )
 
+        # Access Car fields from Vehicle
+        self.vehicle = Vehicle.objects.get(id=self.car.id)
+        self.vehicle2 = Vehicle.objects.get(id=self.car2.id)
+
     def refresh_token(self):
         # Generate JWT token for the user
         refresh = RefreshToken.for_user(self.user)
@@ -54,13 +58,15 @@ class CarViewTest(APITestCase):
         
         url = reverse('car-list')
         response = self.client.get(url)
+        print(json.dumps(response.data, indent=2))
+        
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)  # We have only one car
 
     def test_create_booking_unauthenticated(self):
         url = reverse('create-booking')
         data = {
-            'car': self.car.id,
+            'vehicle': self.vehicle.id,
             'start_time': timezone.make_aware(datetime.datetime.now()).isoformat(),
             'end_time': timezone.make_aware(datetime.datetime.now() + datetime.timedelta(hours=24)).isoformat(),
         }
@@ -74,7 +80,7 @@ class CarViewTest(APITestCase):
         url = reverse('create-booking')
         data = {
             'user': self.user.id,
-            'car': self.car.id,
+            'vehicle': self.vehicle.id,
             'start_time': timezone.make_aware(datetime.datetime.now()).isoformat(),
             'end_time': timezone.make_aware(datetime.datetime.now() + datetime.timedelta(hours=24)).isoformat(),
         }
@@ -111,9 +117,12 @@ class BaseBookingAPITest(APITestCase):
             is_available=True,
             location="Manila",
         )
+        # Access Car fields from Vehicle
+        self.vehicle = Vehicle.objects.get(id=self.car.id)
+        
         self.booking = Booking.objects.create(
             user=self.customer,
-            car=self.car,
+            vehicle=self.vehicle,
             start_time=timezone.make_aware(datetime.datetime.now()),
             end_time=timezone.make_aware(datetime.datetime.now() + datetime.timedelta(hours=1)),
             total_price=10.0
@@ -132,14 +141,15 @@ class CreateBookingAPITest(BaseBookingAPITest):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.customer_token}')
         data = {
             'user': self.customer.id,
-            'car': self.car.id,
+            'vehicle': self.vehicle.id,
             'start_time': timezone.make_aware(datetime.datetime.now()).isoformat(),
             'end_time': timezone.make_aware(datetime.datetime.now() + datetime.timedelta(hours=1)).isoformat()
         }
 
         response = self.client.post('/api/bookings/', data, format='json')
+        print(json.dumps(response.data, indent=2))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(Booking.objects.filter(user=self.customer, car=self.car).exists())
+        self.assertTrue(Booking.objects.filter(user=self.customer, vehicle=self.vehicle).exists())
 
     def test_create_booking_with_invalid_user(self):
         user = User.objects.create_user(email='admin@mail.com', password='testpass', user_type='admin')
@@ -148,7 +158,7 @@ class CreateBookingAPITest(BaseBookingAPITest):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.customer_token}')
         data = {
             'user': user.id,
-            'car': self.car.id,
+            'vehicle': self.vehicle.id,
             'start_time': timezone.make_aware(datetime.datetime.now()).isoformat(),
             'end_time': timezone.make_aware(datetime.datetime.now() + datetime.timedelta(hours=1)).isoformat()
         }

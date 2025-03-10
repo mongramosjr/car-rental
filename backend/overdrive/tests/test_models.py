@@ -1,6 +1,6 @@
 # bookings/test_models.py
 from django.test import TestCase
-from fleet_management.models import Car, Manufacturer
+from fleet_management.models import Car, Manufacturer, Vehicle
 from django.utils import timezone
 import datetime
 from django.core.exceptions import ValidationError

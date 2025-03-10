@@ -9,7 +9,7 @@ from django.utils import timezone
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 
-from fleet_management.models import Car
+from fleet_management.models import Car, Vehicle
 from .serializers import BookingSerializer
 from fleet_management.serializers import CarSerializer
 from .models import Booking
@@ -32,7 +32,7 @@ class CreateBookingAPI(generics.CreateAPIView):
             return None
 
     def perform_create(self, serializer):
-        car = Car.objects.get(id=self.request.data.get('car'))
+        vehicle = Vehicle.objects.get(id=self.request.data.get('vehicle'))
         start_time = self.request.data.get('start_time')
         end_time = self.request.data.get('end_time')
 
@@ -58,10 +58,10 @@ class CreateBookingAPI(generics.CreateAPIView):
 
         # Calculate total price based on duration
         duration = (end_time - start_time).total_seconds() / 3600  # hours
-        total_price = Decimal(duration) * car.price_per_hour
+        total_price = Decimal(duration) * vehicle.price_per_hour
 
         # Save the booking with initial status 'requested'
-        booking = serializer.save(user=self.request.user, car=car, start_time=start_time, end_time=end_time, total_price=total_price)
+        booking = serializer.save(user=self.request.user, vehicle=vehicle, start_time=start_time, end_time=end_time, total_price=total_price)
 
         # Update the booking status to 'requested'
         update_booking_status(booking, 'requested', user=self.request.user)
@@ -107,7 +107,7 @@ class ConfirmBookingView(BaseBookingView):
             profile = self.get_user_profile(request.user)
 
             if not profile or not profile.is_car_owner():
-                return Response({"error": "Only car owners can confirm bookings."}, status=status.HTTP_403_FORBIDDEN)
+                return Response({"error": "Only vehicle owners can confirm bookings."}, status=status.HTTP_403_FORBIDDEN)
 
             update_booking_status(booking, 'confirmed', user=request.user)
             return Response({"message": "Booking confirmed."}, status=status.HTTP_200_OK)
@@ -123,10 +123,10 @@ class RentedBookingView(BaseBookingView):
             profile = self.get_user_profile(request.user)
 
             if not profile or not profile.is_car_owner():
-                return Response({"error": "Only car owners can confirm delivery of car to the customer."}, status=status.HTTP_403_FORBIDDEN)
+                return Response({"error": "Only vehicle owners can confirm delivery of vehicle to the customer."}, status=status.HTTP_403_FORBIDDEN)
 
             update_booking_status(booking, 'rented', user=request.user)
-            return Response({"message": "Car delivered to the customer."}, status=status.HTTP_200_OK)
+            return Response({"message": "Vehicle delivered to the customer."}, status=status.HTTP_200_OK)
         except Booking.DoesNotExist:
             return Response({"error": "Booking not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -154,9 +154,9 @@ class ReturnCarView(BaseBookingView):
             profile = self.get_user_profile(request.user)
 
             if not profile or not profile.is_car_owner():
-                return Response({"error": "Only car owners can return cars."}, status=status.HTTP_403_FORBIDDEN)
+                return Response({"error": "Only vehicle owners can return vehicles."}, status=status.HTTP_403_FORBIDDEN)
 
             update_booking_status(booking, 'returned', user=request.user)
-            return Response({"message": "Car returned."}, status=status.HTTP_200_OK)
+            return Response({"message": "Vehicle returned."}, status=status.HTTP_200_OK)
         except Booking.DoesNotExist:
             return Response({"error": "Booking not found."}, status=status.HTTP_404_NOT_FOUND)

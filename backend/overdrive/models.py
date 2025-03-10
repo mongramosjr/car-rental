@@ -5,14 +5,14 @@ from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 import datetime
 from django.utils.translation import gettext_lazy as _
-from fleet_management.models import Car
+from fleet_management.models import Vehicle
 
 
 User = get_user_model()
 
 class Booking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    car = models.ForeignKey(Car, on_delete=models.CASCADE)
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -35,7 +35,7 @@ class Booking(models.Model):
         default='requested',
     )
     def __str__(self):
-        return f"Booking for {self.car} from {self.start_time} to {self.end_time}"
+        return f"Booking for {self.vehicle} from {self.start_time} to {self.end_time}"
 
     class Meta:
         verbose_name_plural = "Bookings"

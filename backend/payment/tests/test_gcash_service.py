@@ -4,7 +4,7 @@ from payment.services import GcashService
 from overdrive.models import Booking
 from payment.models import BookingPayment
 from payment.gcash_payment import GcashBookingPayment
-from fleet_management.models import Car, Owner, Manufacturer
+from fleet_management.models import Car, Owner, Manufacturer, Vehicle
 
 User = get_user_model()
 
@@ -29,9 +29,11 @@ class GcashServiceTestCase(TestCase):
             model="Test Model", 
             year=2020, 
             price_per_hour=10)
+        # Access Car fields from Vehicle
+        self.vehicle = Vehicle.objects.get(id=self.car.id)
         self.booking = Booking.objects.create(
             user=self.user,
-            car=self.car,
+            vehicle=self.vehicle,
             start_time="2023-10-01T12:00:00Z",
             end_time="2023-10-02T12:00:00Z",
             total_price=240,
@@ -44,6 +46,7 @@ class GcashServiceTestCase(TestCase):
             status='pending'
         )
         self.gcash_service = GcashService()
+
 
     def test_process_payment_success(self):
         success = self.gcash_service.process_payment(self.payment)

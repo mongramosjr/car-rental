@@ -9,7 +9,7 @@ from payment.services import StripeService
 from overdrive.models import Booking
 from payment.models import BookingPayment
 from payment.stripe_payment import StripeBookingPayment
-from fleet_management.models import Car, Owner, Manufacturer
+from fleet_management.models import Car, Owner, Manufacturer, Vehicle
 from django.utils import timezone
 
 User = get_user_model()
@@ -34,9 +34,11 @@ class StripeServiceTestCase(TestCase):
             model="Test Model", 
             year=2020, 
             price_per_hour=10)
+        # Access Car fields from Vehicle
+        self.vehicle = Vehicle.objects.get(id=self.car.id)
         self.booking = Booking.objects.create(
             user=self.user,
-            car=self.car,
+            vehicle=self.vehicle,
             start_time="2023-10-01T12:00:00Z",
             end_time="2023-10-02T12:00:00Z",
             total_price=240,
@@ -50,6 +52,7 @@ class StripeServiceTestCase(TestCase):
             transaction_id='pi_test_123',
         )
         self.stripe_service = StripeService()
+        
 
     @patch('payment.services.stripe_service.stripe.PaymentIntent.create')
     def test_process_payment_success(self, mock_create):

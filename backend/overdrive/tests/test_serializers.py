@@ -3,7 +3,7 @@ from django.test import TestCase
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from overdrive.models import Booking
-from fleet_management.models import Car, Manufacturer
+from fleet_management.models import Car, Manufacturer, Vehicle
 from overdrive.serializers import BookingSerializer
 from fleet_management.serializers import CarSerializer
 import datetime
@@ -36,10 +36,13 @@ class SerializerTestCase(TestCase):
         # Create a car instance
         self.car = Car.objects.create(**self.car_data)
 
+        # Access Car fields from Vehicle
+        self.vehicle = Vehicle.objects.get(id=self.car.id)
+
         # Example data for Booking (assuming Booking model exists with these fields)
         self.booking_data = {
             'user': self.user,  # Assuming user with id 1 exists
-            'car': self.car,
+            'vehicle': self.vehicle,
             'start_time': timezone.make_aware(datetime.datetime.now()),
             'end_time': timezone.make_aware(datetime.datetime.now() + datetime.timedelta(hours=1)),
             'total_price': 12.50  # Example price
@@ -54,6 +57,7 @@ class SerializerTestCase(TestCase):
 
         # Check if the serialized data matches the model instance
         self.assertEqual(data['license_plate'], self.car.license_plate)
+        self.assertEqual(data['passenger_capacity'], self.car.passenger_capacity)
         self.assertEqual(data['make']['id'], self.car.make.id)
         self.assertEqual(data['model'], self.car.model)
         self.assertEqual(float(data['price_per_hour']), float(self.car.price_per_hour))
@@ -65,7 +69,7 @@ class SerializerTestCase(TestCase):
         data = serializer.data
 
         # Check if the serialized data matches the model instance
-        self.assertEqual(data['car'], self.car.id)
+        self.assertEqual(data['vehicle'], self.vehicle.id)
         self.assertEqual(data['user'], self.user.id)  # Assuming user_id corresponds to user field
         self.assertIn('start_time', data)
         self.assertIn('end_time', data)
@@ -74,8 +78,8 @@ class SerializerTestCase(TestCase):
     def test_car_serializer_validation(self):
         invalid_data = {
             'license_plate': 'XYZ7890',  # duplicate license plate
-            'make': self.toyota,
             'passenger_capacity':5,
+            'make': self.toyota,
             'model': 'Civic',
             'year': 2023,
             'is_available': True,
@@ -90,7 +94,7 @@ class SerializerTestCase(TestCase):
     def test_booking_serializer_validation(self):
         # Example: Booking without required fields
         invalid_data = {
-            'car': self.car.id,
+            'vehicle': self.vehicle.id,
             'start_time': datetime.datetime.now().isoformat(),
             # 'end_time' is missing
         }

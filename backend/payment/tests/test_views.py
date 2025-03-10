@@ -8,7 +8,7 @@ from payment.views import ProcessPaymentView
 from payment.services import get_payment_service
 from overdrive.models import Booking
 from payment.models import BookingPayment
-from fleet_management.models import Car, Owner, Manufacturer
+from fleet_management.models import Car, Owner, Manufacturer, Vehicle
 from payment.services import get_payment_service, GcashService, PaypalService, StripeService, CashService
 
 User = get_user_model()
@@ -35,9 +35,11 @@ class PaymentViewTestCase(TestCase):
             model="Test Model", 
             year=2020, 
             price_per_hour=10)
+        # Access Car fields from Vehicle
+        self.vehicle = Vehicle.objects.get(id=self.car.id)
         self.booking = Booking.objects.create(
             user=self.user,
-            car=self.car,
+            vehicle=self.vehicle,
             start_time="2023-10-01T12:00:00Z",
             end_time="2023-10-02T12:00:00Z",
             total_price=240,
