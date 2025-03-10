@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 import datetime
 from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import ValidationError
 from fleet_management.models import Vehicle
 
 
@@ -34,6 +35,27 @@ class Booking(models.Model):
         choices=STATUS_CHOICES,
         default='requested',
     )
+
+    def clean(self):
+        # Prevent overlapping bookings
+        overlapping_bookings = Booking.objects.filter(
+            vehicle=self.vehicle,
+            start_time__lt=self.end_time,
+            end_time__gt=self.start_time,
+            status__in=["rented", "confirmed", "driving"]  # Only active bookings count
+        ).exclude(id=self.id)  # Exclude self in case of updates
+
+        if overlapping_bookings.exists():
+            raise ValidationError("This vehicle is already booked during this time.")
+
+    def save(self, *args, **kwargs):
+        self.clean()  # Validate before saving
+        super().save(*args, **kwargs)
+
+        # Do not update vehicle availability, it must be confirmed manually or automatically if payment is via online
+        # self.vehicle.is_available = False  # Assume booked
+        # self.vehicle.save()
+
     def __str__(self):
         return f"Booking for {self.vehicle} from {self.start_time} to {self.end_time}"
 

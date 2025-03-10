@@ -28,7 +28,7 @@ class SelfieUploadView(BaseVerificationView):
 
         if verification.status != 'pending':
             return Response(
-                {"error": "Selfie already uploaded"},
+                {"detail": "Selfie already uploaded"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -106,13 +106,13 @@ class GetDecryptedImageView(APIView):
         }
 
         if image_type not in image_types:
-            return Response({"error": "Invalid image type"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Invalid image type"}, status=status.HTTP_400_BAD_REQUEST)
 
         image_field = image_types[image_type]
         if not image_field:
-            return Response({"error": f"No {image_type} uploaded"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": f"No {image_type} uploaded"}, status=status.HTTP_404_NOT_FOUND)
 
         decrypted_content = verification.decrypt_image(image_field)
         if decrypted_content:
             return HttpResponse(decrypted_content, content_type="image/jpeg")
-        return Response({"error": "Decryption failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"detail": "Decryption failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

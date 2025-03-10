@@ -61,7 +61,7 @@ class RegisterView(APIView):
                 result = send_otp_sms(user.phone_number, otp, user.email or user.phone_number)
                 if not result:
                     user.delete()
-                    return Response({"error": "Failed to send OTP via SMS. Please try again."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    return Response({"detail": "Failed to send OTP via SMS. Please try again."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             elif user.verification_method == 'Email':
                 subject = 'Your One-Time Password for Registration'
                 message = f'Your OTP for {user.email} is: {otp}. Please do not share this with anyone.'
@@ -71,9 +71,9 @@ class RegisterView(APIView):
                     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
                 except Exception as e:
                     user.delete()
-                    return Response({"error": "Failed to send OTP via email. Please try again."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    return Response({"detail": "Failed to send OTP via email. Please try again."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
-                return Response({"error": "Invalid verification method."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "Invalid verification method."}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({"message": f"OTP sent via {user.verification_method}. Please verify to activate your account."},
                             status=status.HTTP_201_CREATED)
@@ -106,7 +106,7 @@ class LogoutView(APIView):
             refresh_token = request.data.get('refresh')
             if not refresh_token:
                 return Response(
-                    {"error": "Refresh token is required."},
+                    {"detail": "Refresh token is required."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -119,6 +119,6 @@ class LogoutView(APIView):
             )
         except Exception as e:
             return Response(
-                {"error": str(e)},
+                {"detail": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )

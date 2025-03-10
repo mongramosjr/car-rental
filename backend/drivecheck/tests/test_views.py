@@ -13,6 +13,7 @@ from drivecheck.serializers import (
 from django.urls import reverse
 from PIL import Image
 import io
+import json
 
 User = get_user_model()
 
@@ -49,7 +50,7 @@ class VerificationViewTest(TestCase):
     def test_selfie_upload_view(self):
         url = reverse('upload_selfie')
         response = self.client.post(url, {"selfie_image": self.test_image}, format='multipart')
-        
+        print(json.dumps(response.data, indent=2))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["message"], "Selfie uploaded successfully")
         
@@ -63,7 +64,7 @@ class VerificationViewTest(TestCase):
         
         url = reverse('upload_id')
         response = self.client.post(url, {"id_card_image": self.test_image}, format='multipart')
-        
+        print(json.dumps(response.data, indent=2))
         self.assertEqual(response.status_code, 200)
         self.verification.refresh_from_db()
         self.assertEqual(self.verification.status, "id_uploaded")
@@ -74,7 +75,7 @@ class VerificationViewTest(TestCase):
         
         url = reverse('upload_selfie_with_id')
         response = self.client.post(url, {"selfie_with_id_image": self.test_image}, format='multipart')
-        
+        print(json.dumps(response.data, indent=2))
         self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()
         self.verification.refresh_from_db()
@@ -84,7 +85,7 @@ class VerificationViewTest(TestCase):
     def test_verification_status_view(self):
         url = reverse('verification_status')
         response = self.client.get(url)
-        
+        print(json.dumps(response.data, indent=2))
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["status"], "pending")
@@ -97,7 +98,6 @@ class VerificationViewTest(TestCase):
         
         url = reverse('get_decrypted_image', kwargs={'image_type': 'selfie'})
         response = self.client.get(url)
-        
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, self.image_content)  # Decrypted content matches original
 
@@ -105,7 +105,7 @@ class VerificationViewTest(TestCase):
         self.client.credentials()  # Remove authentication
         url = reverse('upload_selfie')
         response = self.client.post(url)
-        
+        print(json.dumps(response.data, indent=2))
         self.assertEqual(response.status_code, 401)
 
     def tearDown(self):

@@ -3,6 +3,7 @@ from rest_framework import status
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+import json
 
 User = get_user_model()
 
@@ -26,6 +27,7 @@ class TokenEndpointTest(APITestCase):
             'password': 'testpass123'
         }
         response = self.client.post(url, data)
+        print(json.dumps(response.data, indent=2))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('access', response.data)

@@ -29,7 +29,7 @@ class CarCreateAPI(APIView):
             owner = Owner.objects.get(user=request.user)
         except Owner.DoesNotExist:
             return Response(
-                {"error": "User is not registered as an owner"},
+                {"detail": "User is not registered as an owner"},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -62,7 +62,7 @@ class CarUpdateAPI(APIView):
 
         if car.owner.user != request.user:
             return Response(
-                {"error": "You can only update your own cars"},
+                {"detail": "You can only update your own cars"},
                 status=status.HTTP_403_FORBIDDEN
             )
 
