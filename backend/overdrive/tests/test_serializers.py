@@ -69,8 +69,8 @@ class SerializerTestCase(TestCase):
         data = serializer.data
 
         # Check if the serialized data matches the model instance
-        self.assertEqual(data['vehicle'], self.vehicle.id)
-        self.assertEqual(data['user'], self.user.id)  # Assuming user_id corresponds to user field
+        self.assertEqual(data['vehicle']['id'], self.vehicle.id)
+        self.assertEqual(data['user']['id'], self.user.id)  # Assuming user_id corresponds to user field
         self.assertIn('start_time', data)
         self.assertIn('end_time', data)
         self.assertEqual(float(data['total_price']), float(self.booking.total_price))

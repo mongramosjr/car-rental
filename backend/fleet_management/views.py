@@ -36,7 +36,7 @@ class CarCreateAPI(APIView):
         data = request.data.copy()
         data['owner'] = owner.id
 
-        serializer = CarSerializer(data=data)
+        serializer = CarSerializer(data=data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -49,7 +49,7 @@ class CarDetailAPI(APIView):
 
     def get(self, request, pk):
         car = get_object_or_404(Car, pk=pk, is_available=True)
-        serializer = CarSerializer(car)
+        serializer = CarSerializer(car, context={'request': request})
         return Response(serializer.data)
 
 # Authenticated endpoint to update a car
@@ -67,7 +67,7 @@ class CarUpdateAPI(APIView):
             )
 
         data = request.data.copy()
-        serializer = CarSerializer(car, data=data, partial=True)
+        serializer = CarSerializer(car, data=data, partial=True, context={'request': request})
 
         if serializer.is_valid():
             serializer.save()

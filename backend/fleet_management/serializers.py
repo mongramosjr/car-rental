@@ -28,12 +28,14 @@ class CarSerializer(serializers.ModelSerializer):
     )
 
     image_url = serializers.SerializerMethodField() # Add this field
+    vehicle_id = serializers.IntegerField(source='vehicle_ptr_id', read_only=True)
+
 
     class Meta:
         model = Car
-        fields = ['id', 'license_plate', 'passenger_capacity', 'make', 'make_id', 'model', 'year',
+        fields = ['id', 'vehicle_id', 'license_plate', 'passenger_capacity', 'make', 'make_id', 'model', 'year',
                  'price_per_hour', 'location', 'is_available', 'owner', 'owner_id', 'image_url']
-        read_only_fields = ['image_url']  # Owner will be set automatically
+        read_only_fields = ['image_url', 'vehicle_id']
 
     def validate(self, data):
         # Additional validation if needed

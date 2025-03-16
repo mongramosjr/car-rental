@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from authdrive.models import OTP
 from authdrive.views import RegisterView, OTPVerificationView
 import pyotp
+import json
 
 User = get_user_model()
 
@@ -24,6 +25,8 @@ class CarRentalUserRegistrationTest(TestCase):
             'user_type': 'customer'
         }
         response = self.client.post(self.register_url, data, format='json')
+
+        print(json.dumps(response.data, indent=2))
         
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.count(), 1)
@@ -54,6 +57,7 @@ class CarRentalUserRegistrationTest(TestCase):
             'user_type': 'customer'
         }
         response = self.client.post(self.register_url, data, format='json')
+        print(json.dumps(response.data, indent=2))
         
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

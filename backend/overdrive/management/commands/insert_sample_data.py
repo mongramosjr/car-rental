@@ -82,9 +82,9 @@ class Command(BaseCommand):
         try:
             # Users data
             users = [
-                {"first_name": "john_doe", "email": "john@example.com", "password": "password", "user_type": "customer"},
-                {"first_name": "jane_smith", "email": "jane@example.com", "password": "password", "user_type": "customer"},
-                {"first_name": "mike_johnson", "email": "mike@example.com", "password": "password", "user_type": "customer"},
+                {"first_name": "john_doe", "email": "john@carowner.com", "password": "password", "user_type": "car_owner"},
+                {"first_name": "jane_smith", "email": "jane@customer.com", "password": "password", "user_type": "customer"},
+                {"first_name": "mike_johnson", "email": "mike@carowner.com", "password": "password", "user_type": "car_owner"},
             ]
             # Insert users
             for user_data in users:
@@ -104,7 +104,10 @@ class Command(BaseCommand):
             for owner in owners:
                 user_owner = User.objects.get(id=owner['user_id'])
                 owner['user'] = user_owner
-                Owner.objects.create(**owner)
+                Owner.objects.create(
+                    user = owner['user'],
+                    name = owner['name']
+                )
             self.stdout.write(self.style.SUCCESS('Inserted owners.'))
 
             # Manufacturer data
@@ -147,6 +150,7 @@ class Command(BaseCommand):
                 car['make'] = manufacturer
                 owner = Owner.objects.get(id=car['owner_id'])
                 car['owner'] = owner
+                car['name'] = owner.name
                 image_filename = car['image_filename']
                 car_obj = Car.objects.create(
                     license_plate=car['license_plate'],
@@ -157,7 +161,8 @@ class Command(BaseCommand):
                     price_per_hour=car['price_per_hour'],
                     location=self.legazpi_geojson,
                     is_available=car['is_available'],
-                    owner=car['owner']
+                    owner=car['owner'],
+                    name=car['name'],
                 )
                 image_path = f'{settings.BASE_DIR}/overdrive/sample_data/cars_images/{image_filename}' # Adjust path if needed
                 print(image_path)
@@ -170,11 +175,11 @@ class Command(BaseCommand):
             # Bookings data
             bookings = [
                 {"vehicle": 3, "start_time": timezone.make_aware(datetime(2025, 2, 10, 8, 0)),
-                 "end_time": timezone.make_aware(datetime(2025, 2, 15, 18, 0)), "user": 1, "total_price": 1200},
+                 "end_time": timezone.make_aware(datetime(2025, 2, 15, 18, 0)), "user": 2, "total_price": 1200},
                 {"vehicle": 1, "start_time": timezone.make_aware(datetime(2025, 2, 17, 9, 0)),
                  "end_time": timezone.make_aware(datetime(2025, 2, 20, 17, 0)), "user": 2, "total_price": 1200},
                 {"vehicle": 2, "start_time": timezone.make_aware(datetime(2025, 2, 25, 10, 0)),
-                 "end_time": timezone.make_aware(datetime(2025, 3, 1, 16, 0)), "user": 3, "total_price": 1200},
+                 "end_time": timezone.make_aware(datetime(2025, 3, 1, 16, 0)), "user": 2, "total_price": 1200},
             ]
             # Insert bookings
             for booking in bookings:

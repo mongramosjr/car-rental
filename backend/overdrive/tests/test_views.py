@@ -8,7 +8,7 @@ import datetime
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from overdrive.models import Booking
-from fleet_management.models import Car, Manufacturer, Vehicle
+from fleet_management.models import Car, Manufacturer, Vehicle, Owner
 import json
 
 User = get_user_model()
@@ -87,8 +87,8 @@ class CarViewTest(APITestCase):
 
         url = reverse('create-booking')
         data = {
-            'user': self.user.id,
-            'vehicle': self.vehicle.id,
+            'user_id': self.user.id,
+            'vehicle_id': self.vehicle.id,
             'start_time': timezone.make_aware(datetime.datetime.now() - datetime.timedelta(days=5)).isoformat(),
             'end_time': timezone.make_aware(datetime.datetime.now() - datetime.timedelta(days=4) + datetime.timedelta(hours=24)).isoformat(),
         }
@@ -109,7 +109,7 @@ class CarViewTest(APITestCase):
         url = reverse('create-booking')
         data = {
             'user': self.user.id,
-            'vehicle': self.vehicle.id,
+            'vehicle_id': self.vehicle.id,
             'start_time': timezone.make_aware(datetime.datetime.now() - datetime.timedelta(days=10)).isoformat(),
             'end_time': timezone.make_aware(datetime.datetime.now() - datetime.timedelta(days=10) + datetime.timedelta(hours=3)).isoformat(),
         }
@@ -127,11 +127,14 @@ class BaseBookingAPITest(APITestCase):
         self.owner = User.objects.create_user(email='owner@mail.com', password='testpass', user_type='car_owner')
         self.owner.is_active = True
         self.owner.save()
+
+        self.car_owner = Owner.objects.create(user=self.owner, name='Owner Carlota')
         self.toyota = Manufacturer.objects.create(
             name="Toyota",
             country="Philippines"
         )
         self.car = Car.objects.create(
+            owner=self.car_owner,
             license_plate="XYZ987",
             passenger_capacity=5,
             make=self.toyota,
@@ -164,8 +167,8 @@ class CreateBookingAPITest(BaseBookingAPITest):
     def test_create_booking(self):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.customer_token}')
         data = {
-            'user': self.customer.id,
-            'vehicle': self.vehicle.id,
+            'user_id': self.customer.id,
+            'vehicle_id': self.vehicle.id,
             'start_time': timezone.make_aware(datetime.datetime.now() + datetime.timedelta(days=2)).isoformat(),
             'end_time': timezone.make_aware(datetime.datetime.now() + datetime.timedelta(days=2) + datetime.timedelta(hours=1)).isoformat()
         }
@@ -183,8 +186,8 @@ class CreateBookingAPITest(BaseBookingAPITest):
         user.save()
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.customer_token}')
         data = {
-            'user': user.id,
-            'vehicle': self.vehicle.id,
+            'user_id': user.id,
+            'vehicle_id': self.vehicle.id,
             'start_time': timezone.make_aware(datetime.datetime.now() + datetime.timedelta(days=4)).isoformat(),
             'end_time': timezone.make_aware(datetime.datetime.now() + datetime.timedelta(days=4) + datetime.timedelta(hours=1)).isoformat()
         }
@@ -287,3 +290,16 @@ class ReturnCarAPITest(BaseBookingAPITest):
         response = self.client.post(f'/api/bookings/return_car/{self.booking.id}/', format='json')
         print(json.dumps(response.data, indent=2))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+class BookingDetailAPITest(BaseBookingAPITest):
+    def test_booking_details(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.owner_token}')
+        response = self.client.get(f'/api/bookings/{self.booking.id}/', format='json')
+        print(json.dumps(response.data, indent=2))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_booking_details_non_existent(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.customer_token}')
+        response = self.client.get(f'/api/bookings/2/', format='json')
+        print(json.dumps(response.data, indent=2))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

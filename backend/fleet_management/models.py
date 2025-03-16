@@ -22,6 +22,7 @@ class Owner(models.Model):
         return self.name
 
 class Vehicle(models.Model):
+    name = models.CharField(max_length=100, help_text="Name of vehicle")
     owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, null=True, blank=True)
     passenger_capacity = models.PositiveSmallIntegerField()
     is_available = models.BooleanField(default=True)
@@ -51,11 +52,9 @@ class Car(Vehicle):  # Separate table for Cars
         return f"{self.make.name} {self.model} {self.year}"
 
 class MotorizedBanca(Vehicle):  # Separate table for Banca
-    name = models.CharField(max_length=100, help_text="Name of banca" )
     vessel_official_number = models.CharField(max_length=64, unique=True)
 
 class PassengerVessel(Vehicle):  # Separate table for Vessels
-    name = models.CharField(max_length=100, help_text="Name of vessel" )
     vessel_official_number = models.CharField(max_length=64, unique=True)
     gross_tonnage = models.FloatField(help_text="Gross tonnage")
     net_tonnage = models.FloatField(help_text="Net tonnage")

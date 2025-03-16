@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import CreateBookingAPI
-from .views import CancelBookingView, ConfirmBookingView, RentedBookingView, StartDrivingView, ReturnCarView
+from .views import CancelBookingView, ConfirmBookingView, RentedBookingView, StartDrivingView, ReturnCarView, BookingDetailAPI
 
 urlpatterns = [
     path('api/bookings/', CreateBookingAPI.as_view(), name='create-booking'),
@@ -9,4 +9,5 @@ urlpatterns = [
     path('api/bookings/delivered/<int:booking_id>/', RentedBookingView.as_view(), name='car_delivered'),
     path('api/bookings/start_driving/<int:booking_id>/', StartDrivingView.as_view(), name='start_driving'),
     path('api/bookings/return_car/<int:booking_id>/', ReturnCarView.as_view(), name='return_car'),
+    path('api/bookings/<int:booking_id>/', BookingDetailAPI.as_view(), name='booking-detail'),
 ]

@@ -174,3 +174,12 @@ PAYPAL_CANCEL_URL = 'http://example.com/api/payments/paypal-cancel/'
 
 MEDIA_URL = '/media/' # URL that will serve the media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # The directory where media files will be stored
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.mail.com'
+EMAIL_PORT = 587  # Use 465 for SSL
+EMAIL_USE_TLS = True  # Use SSL if EMAIL_PORT=465
+EMAIL_HOST_USER = 'example@mail.com'  # Replace with your own email account
+EMAIL_HOST_PASSWORD = 'password'  # Use your password, token or any
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+

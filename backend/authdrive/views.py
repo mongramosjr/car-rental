@@ -16,9 +16,6 @@ import pyotp
 from django.core.mail import send_mail
 import boto3
 
-
-
-
 def generate_otp():
     totp = pyotp.TOTP(pyotp.random_base32())
     return totp.now()

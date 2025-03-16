@@ -10,6 +10,10 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
 from rest_framework.exceptions import APIException
+from django.shortcuts import get_object_or_404
+import json
+from django.core import serializers
+
 
 from fleet_management.models import Car, Vehicle
 from .serializers import BookingSerializer
@@ -35,7 +39,7 @@ class CreateBookingAPI(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         try:
-            vehicle = Vehicle.objects.get(id=self.request.data.get('vehicle'))
+            vehicle = Vehicle.objects.get(id=self.request.data.get('vehicle_id'))
             start_time = self.request.data.get('start_time')
             end_time = self.request.data.get('end_time')
 
@@ -55,7 +59,7 @@ class CreateBookingAPI(generics.CreateAPIView):
                 raise PermissionDenied("Only customers can create bookings.")
 
             # TODO: is this required?
-            user = User.objects.get(id=self.request.data.get('user'))
+            user = User.objects.get(id=self.request.data.get('user_id'))
             if user.email != self.request.user.email:
                 raise PermissionDenied("Only customers can create bookings. Invalid user.")
 
@@ -117,6 +121,9 @@ class ConfirmBookingView(BaseBookingView):
             if not profile or not profile.is_car_owner():
                 return Response({"detail": "Only vehicle owners can confirm bookings."}, status=status.HTTP_403_FORBIDDEN)
 
+            if booking.vehicle.owner.user != request.user:
+                return Response({"detail": "Only vehicle owner can confirm booking."}, status=status.HTTP_403_FORBIDDEN)
+
             update_booking_status(booking, 'confirmed', user=request.user)
             return Response({"message": "Booking confirmed."}, status=status.HTTP_200_OK)
         except Booking.DoesNotExist:
@@ -131,7 +138,16 @@ class RentedBookingView(BaseBookingView):
             profile = self.get_user_profile(request.user)
 
             if not profile or not profile.is_car_owner():
-                return Response({"detail": "Only vehicle owners can confirm delivery of vehicle to the customer."}, status=status.HTTP_403_FORBIDDEN)
+                return Response(
+                    {"detail": "Only vehicle owners can confirm delivery of vehicle to the customer."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+            if booking.vehicle.owner.user != request.user:
+                return Response(
+                    {"detail": "Only vehicle owner can confirm delivery of vehicle to the customer."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
 
             update_booking_status(booking, 'rented', user=request.user)
             return Response({"message": "Vehicle delivered to the customer."}, status=status.HTTP_200_OK)
@@ -164,7 +180,27 @@ class ReturnCarView(BaseBookingView):
             if not profile or not profile.is_car_owner():
                 return Response({"detail": "Only vehicle owners can return vehicles."}, status=status.HTTP_403_FORBIDDEN)
 
+            # data = serializers.serialize('json', [booking.vehicle])
+            # formatted_data = json.loads(data)
+            # print(formatted_data)
+
+            if booking.vehicle.owner.user != request.user:
+                return Response(
+                    {"detail": "Only vehicle owner can return vehicles."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
             update_booking_status(booking, 'returned', user=request.user)
             return Response({"message": "Vehicle returned."}, status=status.HTTP_200_OK)
         except Booking.DoesNotExist:
             return Response({"detail": "Booking not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+# Public endpoint to get car details
+class BookingDetailAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request, booking_id):
+        booking = get_object_or_404(Booking, pk=booking_id)
+        serializer = BookingSerializer(booking, context={'request': request})
+        return Response(serializer.data)
